@@ -78,28 +78,15 @@ if [ "$has_failed" = false ]; then
 
             echo -e "Starting database sync for $CURRENT_DATABASE at $(date +'%d-%m-%Y %H:%M:%S')."
 
-            split --bytes=100MB /tmp/$DUMP /tmp/part
+            # Perform the database sync. Put the output to a variable. if unsuccessful print an entry to the console and the log, and set has_failed to true.
+            echo -r "mysql -u $TARGET_DATABASE_USER -h $TARGET_DATABASE_HOST -p$TARGET_DATABASE_PASSWORD -P $TARGET_DATABASE_PORT -f < /tmp/$DUMP"
+            if sqloutputSync=$(mysql -u $TARGET_DATABASE_USER -h $TARGET_DATABASE_HOST -p"$TARGET_DATABASE_PASSWORD" -P $TARGET_DATABASE_PORT < /tmp/$DUMP 2>&1 ); then
 
-            num_parts=$(ls /tmp/part* | wc -l)
-
-            echo -e "Total parts created: $num_parts"
-
-            for part_file in /tmp/part*; do
-                echo "Importing $part_file..."
-                if mysql -u $TARGET_DATABASE_USER -h $TARGET_DATABASE_HOST -p"$TARGET_DATABASE_PASSWORD" -P $TARGET_DATABASE_PORT $TARGET_DATABASE_NAME -f < $part_file 2>&1 | pv -lep -s $(wc -c < $part_file); then
-                    echo "Part $part_file imported successfully."
-                else
-                    echo "Import of $part_file failed."
-                    has_failed=true
-                fi
-            done
-
-            rm /tmp/part*
-
-            if [ "$has_failed" = true ]; then
-                echo -e "Database sync FAILED for $CURRENT_DATABASE at $(date +'%d-%m-%Y %H:%M:%S'). See log for details."
-            else
                 echo -e "Database sync successfully completed for $CURRENT_DATABASE at $(date +'%d-%m-%Y %H:%M:%S')."
+
+            else
+                echo -e "Database SYNC FAILED for $CURRENT_DATABASE at $(date +'%d-%m-%Y %H:%M:%S'). Error: $sqloutputSync" | tee -a /tmp/kubernetes-mysql-sync.log
+                has_failed=true
             fi
         else
             echo -e "Database DUMP FAILED for $CURRENT_DATABASE at $(date +'%d-%m-%Y %H:%M:%S'). Error: $sqloutputDump" | tee -a /tmp/kubernetes-mysql-sync.log
