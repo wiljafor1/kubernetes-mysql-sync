@@ -3,6 +3,10 @@
 # Set the has_failed variable to false. This will change if any of the subsequent database backups/uploads fail.
 has_failed=false
 
+if [ "$GOOGLE_CHAT_ENABLED" = "true" ]; then
+    /google-chat-alert.sh "Starting sync database on host $SOURCE_DATABASE_HOST."
+fi
+
 # Set the BACKUP_CREATE_DATABASE_STATEMENT variable
 if [ "$BACKUP_CREATE_DATABASE_STATEMENT" = "true" ]; then
     BACKUP_CREATE_DATABASE_STATEMENT="--databases"
