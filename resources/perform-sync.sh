@@ -86,7 +86,7 @@ if [ "$has_failed" = false ]; then
 
             for part_file in /tmp/part*; do
                 echo "Importing $part_file..."
-                if mysql -u $TARGET_DATABASE_USER -h $TARGET_DATABASE_HOST -p"$TARGET_DATABASE_PASSWORD" -P $TARGET_DATABASE_PORT $TARGET_DATABASE_NAME < $part_file 2>&1 | pv -lep -s $(wc -c < $part_file); then
+                if mysql -u $TARGET_DATABASE_USER -h $TARGET_DATABASE_HOST -p"$TARGET_DATABASE_PASSWORD" -P $TARGET_DATABASE_PORT $TARGET_DATABASE_NAME -f < $part_file 2>&1 | pv -lep -s $(wc -c < $part_file); then
                     echo "Part $part_file imported successfully."
                 else
                     echo "Import of $part_file failed."
