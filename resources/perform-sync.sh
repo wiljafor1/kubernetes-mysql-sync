@@ -3,6 +3,8 @@
 # Set the has_failed variable to false. This will change if any of the subsequent database backups/uploads fail.
 has_failed=false
 
+echo "Start" > /tmp/kubernetes-mysql-sync.log
+
 if [ "$GOOGLE_CHAT_ENABLED" = "true" ]; then
     /google-chat-alert.sh "Starting sync database on host $SOURCE_DATABASE_HOST."
 fi
@@ -49,22 +51,22 @@ if [ "$has_failed" = false ]; then
         #DUMP=$CURRENT_DATABASE$(date +$BACKUP_TIMESTAMP).sql
         DUMP=$CURRENT_DATABASE.sql
         # Perform the database dump. Put the output to a variable. If successful upload the target mysql, if unsuccessful print an entry to the console and the log, and set has_failed to true.
-        if sqloutput=$(mysqldump -u $SOURCE_DATABASE_USER -h $SOURCE_DATABASE_HOST -p$SOURCE_DATABASE_PASSWORD -P $SOURCE_DATABASE_PORT $BACKUP_ADDITIONAL_PARAMS $BACKUP_CREATE_DATABASE_STATEMENT $CURRENT_DATABASE 2>&1 >/tmp/$DUMP); then
+        if sqloutputDump=$(mysqldump -u $SOURCE_DATABASE_USER -h $SOURCE_DATABASE_HOST -p$SOURCE_DATABASE_PASSWORD -P $SOURCE_DATABASE_PORT $BACKUP_ADDITIONAL_PARAMS $BACKUP_CREATE_DATABASE_STATEMENT $CURRENT_DATABASE 2>&1 >/tmp/$DUMP); then
 
             echo -e "Database dump successfully completed for $CURRENT_DATABASE at $(date +'%d-%m-%Y %H:%M:%S')."
 
             # Perform the database sync. Put the output to a variable. if unsuccessful print an entry to the console and the log, and set has_failed to true.
-            if sqloutput=$(mysqldump -u $TARGET_DATABASE_USER -h $TARGET_DATABASE_HOST -p$TARGET_DATABASE_PASSWORD -P $TARGET_DATABASE_PORT 2>&1 </tmp/$DUMP); then
+            if sqloutputSync=$(mysqldump -u $TARGET_DATABASE_USER -h $TARGET_DATABASE_HOST -p$TARGET_DATABASE_PASSWORD -P $TARGET_DATABASE_PORT 2>&1 </tmp/$DUMP); then
 
                 echo -e "Database sync successfully completed for $CURRENT_DATABASE at $(date +'%d-%m-%Y %H:%M:%S')."
 
             else
-                echo -e "Database DUMP FAILED for $CURRENT_DATABASE at $(date +'%d-%m-%Y %H:%M:%S'). Error: $sqloutput" | tee -a /tmp/kubernetes-mysql-sync.log
+                echo -e "Database SYNC FAILED for $CURRENT_DATABASE at $(date +'%d-%m-%Y %H:%M:%S'). Error: $sqloutputSync" | tee -a /tmp/kubernetes-mysql-sync.log
                 has_failed=true
             fi
 
         else
-            echo -e "Database DUMP FAILED for $CURRENT_DATABASE at $(date +'%d-%m-%Y %H:%M:%S'). Error: $sqloutput" | tee -a /tmp/kubernetes-mysql-sync.log
+            echo -e "Database DUMP FAILED for $CURRENT_DATABASE at $(date +'%d-%m-%Y %H:%M:%S'). Error: $sqloutputDump" | tee -a /tmp/kubernetes-mysql-sync.log
             has_failed=true
         fi
 
