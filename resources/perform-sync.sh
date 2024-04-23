@@ -44,12 +44,22 @@ if [ "$TARGET_ALL_DATABASES" = "true" ]; then
 fi
 
 if sqloutputTest=$(mysql -u $SOURCE_DATABASE_USER -h $SOURCE_DATABASE_HOST -p$SOURCE_DATABASE_PASSWORD -P $SOURCE_DATABASE_PORT -e "SELECT 1" >/dev/null 2>&1); then
-    echo -e "Database TEST successfully completed at $(date +'%d-%m-%Y %H:%M:%S')."
+    echo -e "Database SOURCE TEST successfully completed at $(date +'%d-%m-%Y %H:%M:%S')."
     if [ "$GOOGLE_CHAT_ENABLED" = "true" ]; then
         /google-chat-alert.sh "Database TEST successfully on host $SOURCE_DATABASE_HOST."
     fi
 else
-    echo -e "Database TEST FAILED at $(date +'%d-%m-%Y %H:%M:%S'). Error: $sqloutputTest" | tee -a /tmp/kubernetes-mysql-sync.log
+    echo -e "Database SOURCE TEST FAILED at $(date +'%d-%m-%Y %H:%M:%S'). Error: $sqloutputTest" | tee -a /tmp/kubernetes-mysql-sync.log
+    has_failed=true
+fi
+
+if sqloutputTest=$(mysql -u $TARGET_DATABASE_USER -h $TARGET_DATABASE_HOST -p$TARGET_DATABASE_PASSWORD -P $TARGET_DATABASE_PORT -e "SELECT 1" >/dev/null 2>&1); then
+    echo -e "Database TARGET TEST successfully completed at $(date +'%d-%m-%Y %H:%M:%S')."
+    if [ "$GOOGLE_CHAT_ENABLED" = "true" ]; then
+        /google-chat-alert.sh "Database TARGET successfully on host $TARGET_DATABASE_HOST."
+    fi
+else
+    echo -e "Database TARGET TEST FAILED at $(date +'%d-%m-%Y %H:%M:%S'). Error: $sqloutputTest" | tee -a /tmp/kubernetes-mysql-sync.log
     has_failed=true
 fi
 
