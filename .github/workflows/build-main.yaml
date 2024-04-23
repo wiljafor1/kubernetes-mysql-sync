@@ -1,8 +1,8 @@
-name: Build on commit to master
+name: Build on commit to main
 on: 
   push:
     branches:
-      - master
+      - main
     paths-ignore:
     - '**.md'
     - '.github/**'
