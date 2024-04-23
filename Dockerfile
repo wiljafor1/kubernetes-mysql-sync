@@ -17,6 +17,7 @@ RUN apk -v --update add \
     gnupg \
     coreutils \
     gzip \
+    pv \
     go \
     git && \
     pip3 install --upgrade python-magic && \
