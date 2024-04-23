@@ -43,6 +43,16 @@ if [ "$TARGET_ALL_DATABASES" = "true" ]; then
     fi
 fi
 
+if sqloutputTest=$(mysql -u $SOURCE_DATABASE_USER -h $SOURCE_DATABASE_HOST -p$SOURCE_DATABASE_PASSWORD -P $SOURCE_DATABASE_PORT -e "SELECT 1" >/dev/null 2>&1); then
+    echo -e "Database TEST successfully completed at $(date +'%d-%m-%Y %H:%M:%S')."
+    if [ "$GOOGLE_CHAT_ENABLED" = "true" ]; then
+        /google-chat-alert.sh "Database TEST successfully on host $SOURCE_DATABASE_HOST."
+    fi
+else
+    echo -e "Database TEST FAILED at $(date +'%d-%m-%Y %H:%M:%S'). Error: $sqloutputTest" | tee -a /tmp/kubernetes-mysql-sync.log
+    has_failed=true
+fi
+
 # Loop through all the defined databases, seperating by a ,
 if [ "$has_failed" = false ]; then
     for CURRENT_DATABASE in ${SOURCE_DATABASE_NAMES//,/ }; do
@@ -51,12 +61,12 @@ if [ "$has_failed" = false ]; then
         #DUMP=$CURRENT_DATABASE$(date +$BACKUP_TIMESTAMP).sql
         DUMP=$CURRENT_DATABASE.sql
         # Perform the database dump. Put the output to a variable. If successful upload the target mysql, if unsuccessful print an entry to the console and the log, and set has_failed to true.
-        if sqloutputDump=$(mysqldump -u $SOURCE_DATABASE_USER -h $SOURCE_DATABASE_HOST -p$SOURCE_DATABASE_PASSWORD -P $SOURCE_DATABASE_PORT $BACKUP_ADDITIONAL_PARAMS $BACKUP_CREATE_DATABASE_STATEMENT $CURRENT_DATABASE 2>&1 >/tmp/$DUMP); then
+        if sqloutputDump=$(mysqldump -u $SOURCE_DATABASE_USER -h $SOURCE_DATABASE_HOST -p$SOURCE_DATABASE_PASSWORD -P $SOURCE_DATABASE_PORT $BACKUP_ADDITIONAL_PARAMS $BACKUP_CREATE_DATABASE_STATEMENT $CURRENT_DATABASE >/tmp/$DUMP 2>&1); then
 
             echo -e "Database dump successfully completed for $CURRENT_DATABASE at $(date +'%d-%m-%Y %H:%M:%S')."
 
             # Perform the database sync. Put the output to a variable. if unsuccessful print an entry to the console and the log, and set has_failed to true.
-            if sqloutputSync=$(mysqldump -u $TARGET_DATABASE_USER -h $TARGET_DATABASE_HOST -p$TARGET_DATABASE_PASSWORD -P $TARGET_DATABASE_PORT 2>&1 </tmp/$DUMP); then
+            if sqloutputSync=$(mysqldump -u $TARGET_DATABASE_USER -h $TARGET_DATABASE_HOST -p$TARGET_DATABASE_PASSWORD -P $TARGET_DATABASE_PORT </tmp/$DUMP  2>&1); then
 
                 echo -e "Database sync successfully completed for $CURRENT_DATABASE at $(date +'%d-%m-%Y %H:%M:%S')."
 
