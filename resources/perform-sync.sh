@@ -77,8 +77,8 @@ if [ "$has_failed" = false ]; then
             echo -e "Database dump successfully completed for $CURRENT_DATABASE at $(date +'%d-%m-%Y %H:%M:%S')."
 
             # Perform the database sync. Put the output to a variable. if unsuccessful print an entry to the console and the log, and set has_failed to true.
-            echo -r "mysqldump -u $TARGET_DATABASE_USER -h $TARGET_DATABASE_HOST -p$TARGET_DATABASE_PASSWORD -P $TARGET_DATABASE_PORT < /tmp/$DUMP"
-            if sqloutputSync=$(mysqldump -u $TARGET_DATABASE_USER -h $TARGET_DATABASE_HOST -p"$TARGET_DATABASE_PASSWORD" -P $TARGET_DATABASE_PORT < /tmp/$DUMP 2>&1 ); then
+            echo -r "mysql -u $TARGET_DATABASE_USER -h $TARGET_DATABASE_HOST -p$TARGET_DATABASE_PASSWORD -P $TARGET_DATABASE_PORT < /tmp/$DUMP"
+            if sqloutputSync=$(mysql -u $TARGET_DATABASE_USER -h $TARGET_DATABASE_HOST -p"$TARGET_DATABASE_PASSWORD" -P $TARGET_DATABASE_PORT < /tmp/$DUMP 2>&1 ); then
 
                 echo -e "Database sync successfully completed for $CURRENT_DATABASE at $(date +'%d-%m-%Y %H:%M:%S')."
 
