@@ -70,15 +70,15 @@ if [ "$has_failed" = false ]; then
         # TODO
         #DUMP=$CURRENT_DATABASE$(date +$BACKUP_TIMESTAMP).sql
         DUMP=$CURRENT_DATABASE.sql
-        echo -e "mysqldump -u $SOURCE_DATABASE_USER -h $SOURCE_DATABASE_HOST -p$SOURCE_DATABASE_PASSWORD -P $SOURCE_DATABASE_PORT --databases $CURRENT_DATABASE >/tmp/$DUMP"
+        echo -e "mysqldump -u $SOURCE_DATABASE_USER -h $SOURCE_DATABASE_HOST -p$SOURCE_DATABASE_PASSWORD -P $SOURCE_DATABASE_PORT --databases $CURRENT_DATABASE > /tmp/$DUMP"
         
         # Perform the database dump. Put the output to a variable. If successful upload the target mysql, if unsuccessful print an entry to the console and the log, and set has_failed to true.
-        if sqloutputDump=$(mysqldump -u $SOURCE_DATABASE_USER -h $SOURCE_DATABASE_HOST -p$SOURCE_DATABASE_PASSWORD -P $SOURCE_DATABASE_PORT --databases $CURRENT_DATABASE 2>&1 > /tmp/$DUMP); then
+        if sqloutputDump=$(mysqldump -u $SOURCE_DATABASE_USER -h $SOURCE_DATABASE_HOST -p$SOURCE_DATABASE_PASSWORD -P $SOURCE_DATABASE_PORT --databases $CURRENT_DATABASE > /tmp/$DUMP 2>&1); then
             echo -e "Database dump successfully completed for $CURRENT_DATABASE at $(date +'%d-%m-%Y %H:%M:%S')."
 
             # Perform the database sync. Put the output to a variable. if unsuccessful print an entry to the console and the log, and set has_failed to true.
-            echo -r "mysqldump -u $TARGET_DATABASE_USER -h $TARGET_DATABASE_HOST -p$TARGET_DATABASE_PASSWORD -P $TARGET_DATABASE_PORT </tmp/$DUMP"
-            if sqloutputSync=$(mysqldump -u $TARGET_DATABASE_USER -h $TARGET_DATABASE_HOST -p"$TARGET_DATABASE_PASSWORD" -P $TARGET_DATABASE_PORT 2>&1 < /tmp/$DUMP); then
+            echo -r "mysqldump -u $TARGET_DATABASE_USER -h $TARGET_DATABASE_HOST -p$TARGET_DATABASE_PASSWORD -P $TARGET_DATABASE_PORT < /tmp/$DUMP"
+            if sqloutputSync=$(mysqldump -u $TARGET_DATABASE_USER -h $TARGET_DATABASE_HOST -p"$TARGET_DATABASE_PASSWORD" -P $TARGET_DATABASE_PORT < /tmp/$DUMP 2>&1 ); then
 
                 echo -e "Database sync successfully completed for $CURRENT_DATABASE at $(date +'%d-%m-%Y %H:%M:%S')."
 
