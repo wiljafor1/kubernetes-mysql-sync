@@ -60,7 +60,7 @@ if [ "$has_failed" = false ]; then
         # TODO
         #DUMP=$CURRENT_DATABASE$(date +$BACKUP_TIMESTAMP).sql
         DUMP=$CURRENT_DATABASE.sql
-        echo -e "mysqldump -u $SOURCE_DATABASE_USER -h $SOURCE_DATABASE_HOST -p$SOURCE_DATABASE_PASSWORD -P $SOURCE_DATABASE_PORT --databases $CURRENT_DATABASE >/tmp/$DUMP"
+        echo -e "mysqldump -u $SOURCE_DATABASE_USER -h $SOURCE_DATABASE_HOST -p$SOURCE_DATABASE_PASSWORD -P $SOURCE_DATABASE_PORT $BACKUP_ADDITIONAL_PARAMS $BACKUP_CREATE_DATABASE_STATEMENT --databases $CURRENT_DATABASE >/tmp/$DUMP"
         
         # Perform the database dump. Put the output to a variable. If successful upload the target mysql, if unsuccessful print an entry to the console and the log, and set has_failed to true.
         if sqloutputDump=$(mysqldump -u $SOURCE_DATABASE_USER -h $SOURCE_DATABASE_HOST -p$SOURCE_DATABASE_PASSWORD -P $SOURCE_DATABASE_PORT --databases $CURRENT_DATABASE >/tmp/$DUMP 2>&1); then
