@@ -10,6 +10,7 @@ else
     BACKUP_CREATE_DATABASE_STATEMENT=""
 fi
 
+
 if [ "$TARGET_ALL_DATABASES" = "true" ]; then
     # Ignore any databases specified by SOURCE_DATABASE_NAMES
     if [ ! -z "$SOURCE_DATABASE_NAMES" ]
