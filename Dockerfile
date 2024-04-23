@@ -33,6 +33,7 @@ ENV AGE_VERSION=552aa0a07de0b42c16126d3107bd8895184a69e7
 COPY resources/google-chat-alert.sh /
 RUN chmod +x /google-chat-alert.sh
 
+
 # Copy sync script and execute
 COPY resources/perform-sync.sh /
 RUN chmod +x /perform-sync.sh
